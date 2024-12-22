@@ -133,8 +133,39 @@ return {
     -- end
 
     dap.listeners.after.event_initialized['dapui_config'] = dapui.open
-    dap.listeners.before.event_terminated['dapui_config'] = dapui.close
-    dap.listeners.before.event_exited['dapui_config'] = dapui.close
+    -- dap.listeners.before.event_terminated['dapui_config'] = dapui.close
+    -- dap.listeners.before.event_exited['dapui_config'] = dapui.close
+
+
+    dap.adapters.go = function(callback, config)
+      local handle
+      local pid_or_err
+      local port = 38697
+  
+      handle, pid_or_err = vim.loop.spawn('dlv', {
+          args = {'dap', '-l', '127.0.0.1:' .. port},
+          detached = true,
+      }, function(code)
+          if code ~= 0 then
+              print('dlv exited with code', code)
+          end
+      end)
+  
+      assert(handle, 'Erreur lors de l\'exécution de delve: ' .. tostring(pid_or_err))
+  
+      vim.defer_fn(function()
+          callback({ type = 'server', host = '127.0.0.1', port = port })
+      end, 100)
+  end
+  
+  dap.configurations.go = {
+      {
+          type = 'go',
+          name = 'Débuguer',
+          request = 'launch',
+          program = "${file}",
+      },
+  }
 
     -- Install golang specific config
     require('dap-go').setup {

@@ -17,6 +17,7 @@ return { -- Highlight, edit, and navigate code
       'vim',
       'vimdoc',
       'c_sharp',
+      'go'
     },
 
     -- Autoinstall languages that are not installed
